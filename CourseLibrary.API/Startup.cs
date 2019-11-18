@@ -1,3 +1,5 @@
+using System;
+using AutoMapper;
 using CourseLibrary.API.DbContexts;
 using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Builder;
@@ -23,20 +25,22 @@ namespace CourseLibrary.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-           services.AddControllers(setupAction =>
-           {
-               setupAction.ReturnHttpNotAcceptable = true;
-               setupAction.OutputFormatters.Add(
-                   new XmlDataContractSerializerOutputFormatter());
-           }).AddXmlDataContractSerializerFormatters();
-             
+            services.AddControllers(setupAction =>
+            {
+                setupAction.ReturnHttpNotAcceptable = true;
+                setupAction.OutputFormatters.Add(
+                    new XmlDataContractSerializerOutputFormatter());
+            }).AddXmlDataContractSerializerFormatters();
+
+            services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
             services.AddScoped<ICourseLibraryRepository, CourseLibraryRepository>();
 
             services.AddDbContext<CourseLibraryContext>(options =>
             {
                 options.UseSqlServer(
                     @"Server=(localdb)\mssqllocaldb;Database=CourseLibraryDB;Trusted_Connection=True;");
-            }); 
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,10 +55,7 @@ namespace CourseLibrary.API
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }
