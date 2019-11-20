@@ -3,6 +3,7 @@ using CourseLibrary.API.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CourseLibrary.API.ResourceParameters;
 
 namespace CourseLibrary.API.Services
 {
@@ -48,8 +49,7 @@ namespace CourseLibrary.API.Services
                 throw new ArgumentNullException(nameof(courseId));
             }
 
-            return _context.Courses
-              .Where(c => c.AuthorId == authorId && c.Id == courseId).FirstOrDefault();
+            return _context.Courses.FirstOrDefault(c => c.AuthorId == authorId && c.Id == courseId);
         }
 
         public IEnumerable<Course> GetCourses(Guid authorId)
@@ -68,6 +68,7 @@ namespace CourseLibrary.API.Services
         {
             // no code in this implementation
         }
+
 
         public void AddAuthor(Author author)
         {
@@ -122,15 +123,29 @@ namespace CourseLibrary.API.Services
             return _context.Authors.ToList();
         }
         
-        public IEnumerable<Author> GetAuthors(string mainCategory)
+        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters parameters)
         {
-            if (string.IsNullOrWhiteSpace(mainCategory))
+            if (string.IsNullOrWhiteSpace(parameters.MainCategory) && string.IsNullOrWhiteSpace(parameters.SearchQuery))
             {
                 return GetAuthors();
             }
 
-            mainCategory = mainCategory.Trim();
-            return _context.Authors.Where(x => x.MainCategory == mainCategory).ToList();
+            var collection = _context.Authors as IQueryable<Author>;
+            
+            if (!string.IsNullOrWhiteSpace(parameters.MainCategory))
+            {
+                parameters.MainCategory = parameters.MainCategory.Trim();
+                collection = collection.Where(x => x.MainCategory == parameters.MainCategory);
+            }
+            if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
+            {
+                parameters.SearchQuery = parameters.SearchQuery.Trim();
+                collection = collection.Where(x => x.MainCategory.Contains(parameters.SearchQuery)
+                                                   || x.FirstName.Contains(parameters.SearchQuery)
+                                                   || x.LastName.Contains(parameters.SearchQuery));
+            }
+
+            return collection.ToList();
         }
          
         public IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds)
