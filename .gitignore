@@ -1,2 +1,6 @@
 ﻿.idea/
+CourseLibrary.API/.idea/
 obj/
+/.idea/
+/CourseLibrary.API/bin/
+/CourseLibrary.API/obj/

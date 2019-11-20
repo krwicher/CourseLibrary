@@ -23,20 +23,21 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpGet()]
-        public ActionResult<IEnumerable<AuthorDto>> GetAuthors()
+        [HttpHead]
+        public ActionResult<IEnumerable<AuthorDto>> GetAuthors([FromQuery(Name = "mainCategory")] string mainCategory)
         {
             var authorsFromRepo = _courseLibraryRepository.GetAuthors();
-            
-            return new OkObjectResult(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
+
+            return Ok(_mapper.Map<IEnumerable<AuthorDto>>(authorsFromRepo));
         }
 
         [HttpGet("{authorId}")]
         public ActionResult<AuthorDto> GetAuthor(Guid authorId)
         {
             var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
-            if(authorFromRepo == null)
-                return new NotFoundResult();
-            return new OkObjectResult(_mapper.Map<AuthorDto>(authorFromRepo));
+            if (authorFromRepo == null)
+                return NotFound();
+            return Ok(_mapper.Map<AuthorDto>(authorFromRepo));
         }
     }
 }
