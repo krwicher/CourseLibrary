@@ -80,11 +80,6 @@ namespace CourseLibrary.API.Services
             // the repository fills the id (instead of using identity columns)
             author.Id = Guid.NewGuid();
 
-            foreach (var course in author.Courses)
-            {
-                course.Id = Guid.NewGuid();
-            }
-
             _context.Authors.Add(author);
         }
 

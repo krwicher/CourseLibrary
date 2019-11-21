@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using CourseLibrary.API.Entities;
 using CourseLibrary.API.Helpers;
+using CourseLibrary.API.Models;
 
 namespace CourseLibrary.API.Profiles
 {
@@ -7,6 +9,7 @@ namespace CourseLibrary.API.Profiles
     {
         public AuthorsProfile()
         {
+            CreateMap<AuthorForCreationDto, Author>();
             CreateMap<Entities.Author, Models.AuthorDto>()
                 .ForMember(
                     dest => dest.Name,
