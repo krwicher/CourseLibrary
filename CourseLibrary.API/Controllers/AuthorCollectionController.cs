@@ -23,7 +23,7 @@ namespace CourseLibrary.API.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet("{{ids}}", Name = "GetAuthorCollection")]
+        [HttpGet("({ids})", Name = "GetAuthorCollection")]
         public IActionResult GetAuthorCollection(
             [FromRoute] [ModelBinder(BinderType = typeof(ArrayModelBinder))]
             IEnumerable<Guid> ids)
