@@ -5,11 +5,13 @@ using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Serialization;
 
 namespace CourseLibrary.API
 {
@@ -25,7 +27,37 @@ namespace CourseLibrary.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(setupAction =>
+            {
+                setupAction.ReturnHttpNotAcceptable = true;
+                
+            }).AddXmlDataContractSerializerFormatters()
+                .AddNewtonsoftJson(x =>
+                {
+                    x.SerializerSettings.ContractResolver =
+                        new CamelCasePropertyNamesContractResolver();
+                })
+                .ConfigureApiBehaviorOptions(setupAction =>
+                {
+                    setupAction.InvalidModelStateResponseFactory = context =>
+                    {
+                        var problemDetails = new ValidationProblemDetails(context.ModelState)
+                        {
+                            Type = "https://courselibrary.com/modelvalidationproblem",
+                            Title = "One or more model validation errors occurred.",
+                            Status = StatusCodes.Status422UnprocessableEntity,
+                            Detail = "See the errors property for details.",
+                            Instance = context.HttpContext.Request.Path
+                        };
+
+                        problemDetails.Extensions.Add("traceId", context.HttpContext.TraceIdentifier);
+
+                        return new UnprocessableEntityObjectResult(problemDetails)
+                        {
+                            ContentTypes = { "application/problem+json" }
+                        };
+                    };
+                });
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
