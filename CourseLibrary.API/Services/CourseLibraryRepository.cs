@@ -125,11 +125,6 @@ namespace CourseLibrary.API.Services
         
         public IEnumerable<Author> GetAuthors(AuthorsResourceParameters parameters)
         {
-            if (string.IsNullOrWhiteSpace(parameters.MainCategory) && string.IsNullOrWhiteSpace(parameters.SearchQuery))
-            {
-                return GetAuthors();
-            }
-
             var collection = _context.Authors as IQueryable<Author>;
             
             if (!string.IsNullOrWhiteSpace(parameters.MainCategory))
@@ -145,7 +140,10 @@ namespace CourseLibrary.API.Services
                                                    || x.LastName.Contains(parameters.SearchQuery));
             }
 
-            return collection.ToList();
+            return collection
+                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
+                .Take(parameters.PageSize)
+                .ToList();
         }
          
         public IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds)
