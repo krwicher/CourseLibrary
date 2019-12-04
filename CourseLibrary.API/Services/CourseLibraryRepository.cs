@@ -3,6 +3,7 @@ using CourseLibrary.API.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CourseLibrary.API.Helpers;
 using CourseLibrary.API.ResourceParameters;
 
 namespace CourseLibrary.API.Services
@@ -123,7 +124,7 @@ namespace CourseLibrary.API.Services
             return _context.Authors.ToList();
         }
         
-        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters parameters)
+        public PagedList<Author> GetAuthors(AuthorsResourceParameters parameters)
         {
             var collection = _context.Authors as IQueryable<Author>;
             
@@ -140,10 +141,7 @@ namespace CourseLibrary.API.Services
                                                    || x.LastName.Contains(parameters.SearchQuery));
             }
 
-            return collection
-                .Skip(parameters.PageSize * (parameters.PageNumber - 1))
-                .Take(parameters.PageSize)
-                .ToList();
+            return PagedList<Author>.Create(collection, parameters.PageNumber, parameters.PageSize); 
         }
          
         public IEnumerable<Author> GetAuthors(IEnumerable<Guid> authorIds)
